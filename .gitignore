@@ -1,0 +1,4 @@
+/app/venv/
+/deployment/build/
+/deployment/dist/
+/deployment/venv/
