@@ -5,11 +5,25 @@
     aws_region: eu-central-1
     code_path: ../app/
     zip_name: poincare_quotes.zip
-    # <paste in extra vars here>
-    workshop_id: batman
+    # Replace with vars from workshops page:
+    workshop_id: ''
+    aws_access_key: ''
+    aws_secret_key: ''
   tasks:
 
-  # 1. Create a Lambda package zip file including all dependencies
+  # 1. Validate setup
+
+  - name: assert variables are set
+    assert:
+      that:
+      - workshop_id > ''
+      - aws_access_key > ''
+      - aws_secret_key > ''
+      fail_msg: >
+        The variables 'workshop_id', 'aws_access_key', and 'aws_secret_key'
+        need to be set!
+
+  # 2. Create a Lambda package zip file including all dependencies
 
   - name: ensure build directory exists
     file:
@@ -57,34 +71,43 @@
     args:
       chdir: build/
 
-  # 2. Create base resources
+  # 3. Create base resources
 
   - name: create or update base stack
+    # https://docs.ansible.com/ansible/latest/modules/cloudformation_module.html
     cloudformation:
       region: '{{ aws_region }}'
+      aws_access_key: '{{ aws_access_key }}'
+      aws_secret_key: '{{ aws_secret_key }}'
       stack_name: '{{ workshop_id }}-base'
-      template: cloudformation_base.yml
+      template: files/cloudformation_base.yml
       template_parameters:
         WorkshopId: '{{ workshop_id }}'
     register: base_stack_result
 
-  # 3. Upload Lambda package into S3 bucket
+  # 4. Upload Lambda package into S3 bucket
 
   - name: copy package to s3
+    # Not using Ansible module to do this because it doesn't provide one that returns the VersionId
     command: >
       aws s3api put-object
       --bucket {{ base_stack_result.stack_outputs.PackageS3Bucket }}
       --key {{ zip_name }}
       --body dist/{{ zip_name }}
+    environment:
+      AWS_ACCESS_KEY_ID: '{{ aws_access_key }}'
+      AWS_SECRET_ACCESS_KEY: '{{ aws_secret_key }}'
     register: s3_result
 
-  # 4. Create site resources
+  # 5. Create site resources
 
   - name: create or update site stack
     cloudformation:
       region: '{{ aws_region }}'
+      aws_access_key: '{{ aws_access_key }}'
+      aws_secret_key: '{{ aws_secret_key }}'
       stack_name: '{{ workshop_id }}-site'
-      template: cloudformation_site.yml
+      template: files/cloudformation_site.yml
       template_parameters:
         PackageS3Bucket: '{{ base_stack_result.stack_outputs.PackageS3Bucket }}'
         PackageS3Key: '{{ zip_name }}'
