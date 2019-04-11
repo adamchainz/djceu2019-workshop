@@ -30,6 +30,9 @@
       src: '{{ code_path }}'
       dest: build/
       delete: true
+      rsync_opts:
+      - "--exclude=/.gitkeep"
+      - "--exclude=/venv"
 
   - name: add setup.cfg to build directory to allow pip to install directly into it
     # https://docs.aws.amazon.com/lambda/latest/dg/lambda-python-how-to-create-deployment-package.html
