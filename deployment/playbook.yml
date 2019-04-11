@@ -25,11 +25,6 @@
 
   # 2. Create a Lambda package zip file including all dependencies
 
-  - name: ensure build directory exists
-    file:
-      path: build/
-      state: directory
-
   - name: copy application code into build directory
     synchronize:
       src: '{{ code_path }}'
