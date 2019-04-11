@@ -9,53 +9,6 @@ Parameters:
 
 Resources:
 
-  # IAM User you are using to do this workshop
-
-  IAMUser:
-    Type: AWS::IAM::User
-    Properties:
-      UserName: !Ref WorkshopId
-
-  IAMUserAllowWorkshopActions:
-    Type: AWS::IAM::Policy
-    Properties:
-      Users:
-      - !Ref IAMUser
-      PolicyName: AllowWorkshopActions
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-        - Effect: Allow
-          Action:
-          - cloudformation:DescribeStackEvents
-          - cloudformation:DescribeStacks
-          - cloudformation:ListStackResources
-          - cloudformation:UpdateStack
-          Resource:
-          - !Sub arn:aws:cloudformation:*:${AWS::AccountId}:stack/${WorkshopId}-*
-        - Effect: Allow
-          Action:
-          - lambda:UpdateFunctionCode
-          - lambda:GetFunctionConfiguration
-          Resource:
-          - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${WorkshopId}-*
-        - Effect: Allow
-          Action:
-          - s3:GetObject
-          - s3:GetObjectVersion
-          - s3:PutObject
-          Resource:
-          - !Sub ${PackageS3Bucket.Arn}/*
-        - Effect: Allow
-          Action:
-          - apigateway:*
-          Resource: "*"
-
-  IAMUserAccessKey:
-    Type: AWS::IAM::AccessKey
-    Properties:
-      UserName: !Ref IAMUser
-
   # IAM Role that the API runs with
 
   LambdaIAMRole:
@@ -109,12 +62,6 @@ Resources:
             DaysAfterInitiation: 1
 
 Outputs:
-
-  IAMUserAccessKeyId:
-    Value: !Ref IAMUserAccessKey
-
-  IAMUserSecretAccessKey:
-    Value: !GetAtt IAMUserAccessKey.SecretAccessKey
 
   LambdaIAMRoleArn:
     Value: !GetAtt LambdaIAMRole.Arn

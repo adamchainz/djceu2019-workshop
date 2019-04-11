@@ -5,10 +5,8 @@
     aws_region: eu-central-1
     code_path: ../app/
     zip_name: poincare_quotes.zip
-    # Replace with vars from workshops page:
+    # Replace with any name to namespace the application, e.g. 'zebra'
     workshop_id: ''
-    aws_access_key: ''
-    aws_secret_key: ''
   tasks:
 
   # 1. Validate setup
@@ -17,11 +15,8 @@
     assert:
       that:
       - workshop_id > ''
-      - aws_access_key > ''
-      - aws_secret_key > ''
       fail_msg: >
-        The variables 'workshop_id', 'aws_access_key', and 'aws_secret_key'
-        need to be set!
+        The variable 'workshop_id' needs to be set!
 
   # 2. Create a Lambda package zip file including all dependencies
 
@@ -75,8 +70,6 @@
     # https://docs.ansible.com/ansible/latest/modules/cloudformation_module.html
     cloudformation:
       region: '{{ aws_region }}'
-      aws_access_key: '{{ aws_access_key }}'
-      aws_secret_key: '{{ aws_secret_key }}'
       stack_name: '{{ workshop_id }}-base'
       template: files/cloudformation_base.yml
       template_parameters:
@@ -92,9 +85,6 @@
       --bucket {{ base_stack_result.stack_outputs.PackageS3Bucket }}
       --key {{ zip_name }}
       --body dist/{{ zip_name }}
-    environment:
-      AWS_ACCESS_KEY_ID: '{{ aws_access_key }}'
-      AWS_SECRET_ACCESS_KEY: '{{ aws_secret_key }}'
     register: s3_result
 
   # 5. Create site resources
@@ -102,8 +92,6 @@
   - name: create or update site stack
     cloudformation:
       region: '{{ aws_region }}'
-      aws_access_key: '{{ aws_access_key }}'
-      aws_secret_key: '{{ aws_secret_key }}'
       stack_name: '{{ workshop_id }}-site'
       template: files/cloudformation_site.yml
       template_parameters:
