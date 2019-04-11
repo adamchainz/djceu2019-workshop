@@ -67,3 +67,10 @@ Change the local version and deploy by rerunning the Ansible playbook. For
 example, try changing the font, or the CSS, or the quotes! Be unique, so you
 know it's not a trick and it's really your serverless Application being
 deployed.
+
+## Deploying to your own AWS Account
+
+To deploy the application on your own AWS account, configure your AWS
+credentials as an admin on that account (use the AWS CLI's `aws configure`),
+check out the branch `deploy_as_admin_on_own_aws_account`, change its
+`workshop_id` variable, and run the playbook as above.
